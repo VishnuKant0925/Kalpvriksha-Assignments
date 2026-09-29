@@ -1,7 +1,7 @@
 *.exe
 *.out
 *.o
-
+Practice/
 .vscode/
 
 Thumbs.db
