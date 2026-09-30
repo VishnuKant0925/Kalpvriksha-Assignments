@@ -1,6 +1,8 @@
 *.exe
 *.out
 *.o
+*.txt
+
 Practice/
 .vscode/
 
