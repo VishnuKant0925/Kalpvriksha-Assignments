@@ -13,21 +13,40 @@ int precedence(char ch)
     return 0;
 }
 
-int main()
+void calculate(int num[], int *numTop, char currentOp, int *error)
 {
-    char input[500];
-    int num[500];
-    char op[500];
+    int b = num[(*numTop)--];
+    int a = num[(*numTop)--];
 
-    int numTop = -1;
-    int opTop = -1;
+    if (currentOp == '+')
+    {
+        num[++(*numTop)] = a + b;
+    }
+    else if (currentOp == '-')
+    {
+        num[++(*numTop)] = a - b;
+    }
+    else if (currentOp == '*')
+    {
+        num[++(*numTop)] = a * b;
+    }
+    else if (currentOp == '/')
+    {
+        if (b == 0)
+        {
+            *error = 2;
+            return;
+        }
+
+        num[++(*numTop)] = a / b;
+    }
+}
+
+void processExpression(char input[], int num[], char op[],
+                       int *numTop, int *opTop, int *error)
+{
     int i = 0;
-    int error = 0;
-
     bool expectNumber = true;
-
-    printf("Enter expression: ");
-    fgets(input, 500, stdin);
 
     while (input[i] != '\0')
     {
@@ -41,7 +60,7 @@ int main()
         {
             if (!expectNumber)
             {
-                error = 1;
+                *error = 1;
                 break;
             }
 
@@ -53,7 +72,7 @@ int main()
                 i++;
             }
 
-            num[++numTop] = number;
+            num[++(*numTop)] = number;
             expectNumber = false;
         }
 
@@ -64,95 +83,66 @@ int main()
         {
             if (expectNumber)
             {
-                error = 1;
+                *error = 1;
                 break;
             }
 
             char currentOperator = input[i];
 
-            while (opTop >= 0 &&
-                   precedence(op[opTop]) >= precedence(currentOperator))
+            while (*opTop >= 0 &&
+                   precedence(op[*opTop]) >= precedence(currentOperator))
             {
-                char currentOp = op[opTop--];
+                char currentOp = op[(*opTop)--];
 
-                int b = num[numTop--];
-                int a = num[numTop--];
+                calculate(num, numTop, currentOp, error);
 
-                if (currentOp == '+')
-                {
-                    num[++numTop] = a + b;
-                }
-                else if (currentOp == '-')
-                {
-                    num[++numTop] = a - b;
-                }
-                else if (currentOp == '*')
-                {
-                    num[++numTop] = a * b;
-                }
-                else if (currentOp == '/')
-                {
-                    if (b == 0)
-                    {
-                        error = 2;
-                        break;
-                    }
-
-                    num[++numTop] = a / b;
-                }
+                if (*error != 0)
+                    break;
             }
 
-            if (error != 0)
+            if (*error != 0)
                 break;
 
-            op[++opTop] = currentOperator;
+            op[++(*opTop)] = currentOperator;
             expectNumber = true;
             i++;
         }
 
         else
         {
-            error = 1;
+            *error = 1;
             break;
         }
     }
 
-    if (error == 0 && expectNumber)
-        error = 1;
+    if (*error == 0 && expectNumber)
+        *error = 1;
 
-    while (error == 0 && opTop >= 0)
+    while (*error == 0 && *opTop >= 0)
     {
-        char currentOp = op[opTop--];
+        char currentOp = op[(*opTop)--];
 
-        int b = num[numTop--];
-        int a = num[numTop--];
-
-        if (currentOp == '+')
-        {
-            num[++numTop] = a + b;
-        }
-        else if (currentOp == '-')
-        {
-            num[++numTop] = a - b;
-        }
-        else if (currentOp == '*')
-        {
-            num[++numTop] = a * b;
-        }
-        else if (currentOp == '/')
-        {
-            if (b == 0)
-            {
-                error = 2;
-                break;
-            }
-
-            num[++numTop] = a / b;
-        }
+        calculate(num, numTop, currentOp, error);
     }
 
-    if (error == 0 && numTop != 0)
-        error = 1;
+    if (*error == 0 && *numTop != 0)
+        *error = 1;
+}
+
+int main()
+{
+    char input[500];
+    int num[500];
+    char op[500];
+
+    int numTop = -1;
+    int opTop = -1;
+    int error = 0;
+
+    printf("Enter expression: ");
+    fgets(input, 500, stdin);
+
+    processExpression(input, num, op, &numTop, &opTop, &error);
 
     if (error == 1)
     {

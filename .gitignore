@@ -3,7 +3,7 @@
 *.o
 
 .vscode/
-
+Practice/
 Thumbs.db
 desktop.ini
 *.tmp
