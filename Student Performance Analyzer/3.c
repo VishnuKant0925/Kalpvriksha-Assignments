@@ -70,16 +70,12 @@ int main()
 {
     struct Student students[100];
     int n;                          
-    printf("Enter the number of students (1-100): ");
     scanf("%d", &n);
-    printf("Enter roll number, name, and Marks1 Marks2 Marks3 for each student separated by spaces :\n");
-    if (n < 1 || n > 100)
-    {
+    if (n < 1 || n > 100){
         printf("Invalid number of students\n");
         return 1;
-    }
-    for (int i = 0; i < n; i++)
-    {
+      }
+    for (int i = 0; i < n; i++){
         scanf("%d %s %d %d %d",
               &students[i].roll,
               students[i].name,
@@ -87,8 +83,7 @@ int main()
               &students[i].marks2,
               &students[i].marks3);
     }
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++){
         int total = Total(students[i].marks1,
                           students[i].marks2,
                           students[i].marks3);
