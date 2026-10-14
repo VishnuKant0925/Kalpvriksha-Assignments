@@ -40,10 +40,24 @@ int main(){
     float discount;
     float finalAmount;
     
-
-    scanf("%s",name);
+    printf("Enter Customer Name : ");
+    scanf("%99s",name);
+    printf("\nEnter Total Tickets : ");
     scanf("%d",&totalTickets);
+
+    if(totalTickets > 20 || totalTickets < 1){
+        printf("Invalid Ticket quantity : should be from 1 to 20 only");
+        return 1;
+    }
+
+    printf("\nEnter Ticket category choice (1 = Standard, 2 = Premium, 3 = Recliner): ");
     scanf("%d",&ticketCategory);
+
+    if(ticketCategory < 1 || ticketCategory > 3){
+        printf("Invalid Ticket category : should be from 1 to 3 only");
+        return 1;
+    }
+
     const char *ticket = TicketCategory(ticketCategory);
     
     totalAmount = TotalAmount(totalTickets ,  ticketCategory);
@@ -55,7 +69,7 @@ int main(){
         finalAmount = totalAmount;
         discount = 0.0f;
     }
-    printf("Customer : %s\n",name);
+    printf("\nCustomer : %s\n",name);
     printf("Ticket Category : %s\n",ticket);
     printf("Tickets : %d\n",totalTickets);
     printf("Subtotal : %.2f\n",totalAmount);
