@@ -3,26 +3,32 @@
 const int STANDARD = 150;
 const int PREMIUM = 250;
 const int RECLINER = 400;
-
+enum{
+    Standard = 1,
+    Premium,
+    Recliner
+};
 const char* TicketCategory(int category) {
     switch (category) {
-        case 1:
+        case Standard:
             return "Standard";
-        case 2:
+        case Premium:
             return "Premium";
-        case 3:
+        case Recliner:
             return "Recliner";
     }
 }
 float TotalAmount(int totalTickets , int ticketCategory ){
     float amount = 1.0f;
     switch (ticketCategory) {
-        case 1:
+        case Standard:
             return amount * totalTickets * STANDARD;
-        case 2:
+        case Premium:
             return amount * totalTickets * PREMIUM;
-        case 3:
+        case Recliner:
             return amount * totalTickets * RECLINER;
+        default:
+            return 0.0f;    
         
     }
 
@@ -41,7 +47,7 @@ int main(){
     float finalAmount;
     
     printf("Enter Customer Name : ");
-    scanf("%99s",name);
+    scanf("%49s",name);
     printf("\nEnter Total Tickets : ");
     scanf("%d",&totalTickets);
 
