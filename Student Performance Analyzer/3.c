@@ -69,24 +69,36 @@ void printRollNumbers(struct Student students[], int i, int n)
 int main()
 {
     struct Student students[100];
-    int n;                          
+    int n;
+    printf("Enter the number of students (1-100): ");                         
     scanf("%d", &n);
     if (n < 1 || n > 100){
         printf("Invalid number of students\n");
         return 1;
       }
     for (int i = 0; i < n; i++){
+        printf("Enter roll number, name, marks1, marks2, marks3 for student %d: ", i + 1);
         scanf("%d %s %d %d %d",
               &students[i].roll,
               students[i].name,
               &students[i].marks1,
               &students[i].marks2,
               &students[i].marks3);
+        if (students[i].marks1 < 1 || students[i].marks1 > 100){
+            printf("Error! Marks must be between 1 and 100.\n");
+            return 1;
+        }
+        if (students[i].marks2 < 1 || students[i].marks2 > 100){
+            printf("Error! Marks must be between 1 and 100.\n");
+            return 1;
+        }
+        if (students[i].marks3 < 1 || students[i].marks3 > 100){
+            printf("Error! Marks must be between 1 and 100.\n");
+            return 1;
+        }
     }
     for (int i = 0; i < n; i++){
-        int total = Total(students[i].marks1,
-                          students[i].marks2,
-                          students[i].marks3);
+        int total = Total(students[i].marks1,students[i].marks2,students[i].marks3);
         float average = Average(total);
         char grade = Grade(average);
 
@@ -98,9 +110,11 @@ int main()
         printf("Average: %.2f\n", average);
         printf("Grade: %c\n", grade);
 
-        if (average < 35)
-            continue;               
-
+        if (average < 35){
+            printf("\n");
+            continue;
+        }
+                         
         printf("Performance: ");
         printStars(grade);
     }
