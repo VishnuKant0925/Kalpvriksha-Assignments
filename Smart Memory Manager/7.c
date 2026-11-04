@@ -197,7 +197,7 @@ void merge_free_blocks(MemoryManager *manager){
     }
 }
 
-void report_fragmentation(MemoryManager *manager)
+void report_fragmentation(MemoryManager *manager, size_t requested)
 {
     size_t total_free = 0;
     size_t largest_free = 0;
@@ -215,8 +215,11 @@ void report_fragmentation(MemoryManager *manager)
         }
     }
 
-    printf("Total free memory: %zu\n", total_free);
-    printf("Largest free block: %zu\n", largest_free);
+    printf("Free: %zu bytes\n", total_free);
+    printf("Largest free block: %zu bytes\n", largest_free);
+
+    if (total_free >= requested && largest_free < requested)
+        printf("Note: The request for %zu bytes failed even though %zu bytes are free, because the free memory is fragmented.\n", requested, total_free);
 
     double fragmentation = total_free ? 100.0 * (total_free - largest_free) / total_free : 0.0;
 
@@ -235,8 +238,8 @@ void allocate_memory(MemoryManager *manager, size_t size)
 
     if (index == SIZE_MAX)
     {
-        puts("Allocation failed.");
-        report_fragmentation(manager);
+        puts("Allocation failed: no contiguous free block is large enough.");
+        report_fragmentation(manager, size);
         return;
     }
 
@@ -259,7 +262,7 @@ void allocate_memory(MemoryManager *manager, size_t size)
         insert_block(manager, index + 1, (Block){free_block.start + size, remaining, 0, false});
     }
 
-    printf("Allocated ID: %u | Start: %zu | Size: %zu\n", id, free_block.start, size);
+    printf("Allocation successful. ID: %u, Start: %zu, Size: %zu\n", id, free_block.start, size);
 }
 
 void release_memory(MemoryManager *manager, unsigned int id)
@@ -276,7 +279,7 @@ void release_memory(MemoryManager *manager, unsigned int id)
     manager->blocks[index].id = 0;
 
     merge_free_blocks(manager);
-    puts("Memory released.");
+    puts("Allocation released.");
 }
 
 void resize_memory(MemoryManager *manager, unsigned int id, size_t new_size)
@@ -342,7 +345,7 @@ void resize_memory(MemoryManager *manager, unsigned int id, size_t new_size)
     if (destination == SIZE_MAX)
     {
         puts("Resize failed.");
-        report_fragmentation(manager);
+        report_fragmentation(manager, new_size);
         return;
     }
 
@@ -378,18 +381,16 @@ void resize_memory(MemoryManager *manager, unsigned int id, size_t new_size)
 
 void display_memory_map(MemoryManager *manager)
 {
-    puts("\n--- Memory Map ---");
+    printf("\nMemory Map (%zu bytes):\n", manager->total_size);
 
     for (size_t i = 0; i < manager->count; i++)
     {
         Block block = manager->blocks[i];
 
-        printf("[%zu - %zu] %s | Size: %zu", block.start, block.start + block.size - 1, block.allocated ? "Allocated" : "Free", block.size);
-
         if (block.allocated)
-            printf(" | ID: %u", block.id);
-
-        putchar('\n');
+            printf("[Allocated #%u: %zu bytes, Start: %zu]\n", block.id, block.size, block.start);
+        else
+            printf("[Free: %zu bytes, Start: %zu]\n", block.size, block.start);
     }
 }
 
@@ -416,13 +417,19 @@ void display_statistics(MemoryManager *manager)
         }
     }
 
-    printf("\nTotal memory: %zu\n", manager->total_size);
-    printf("Used memory: %zu\n", used);
-    printf("Free memory: %zu\n", free_size);
+    printf("\nTotal memory: %zu bytes\n", manager->total_size);
+    printf("Allocated: %zu bytes\n", used);
+    printf("Free: %zu bytes\n", free_size);
     printf("Allocations: %zu\n", allocations);
     printf("Free blocks: %zu\n", free_blocks);
 
-    report_fragmentation(manager);
+    size_t largest_free = 0;
+    for (size_t i = 0; i < manager->count; i++)
+    {
+        if (!manager->blocks[i].allocated && manager->blocks[i].size > largest_free)
+            largest_free = manager->blocks[i].size;
+    }
+    printf("Largest free block: %zu bytes\n", largest_free);
 }
 
 void change_strategy(MemoryManager *manager)
@@ -463,11 +470,11 @@ int main()
     size_t memory_size;
     int choice;
 
-    printf("Enter total memory size: ");
+    printf("Enter memory pool size: ");
     scanf("%zu", &memory_size);
     if (memory_size < 1 || memory_size > 1000000)
     {
-        printf("The memory pool size must be between 1and 1,000,000 bytes.\n");
+        printf("The memory pool size must be between 1 and 1,000,000 bytes.\n");
         return 1;
     }
     if (!initialize_manager(&manager, memory_size))
@@ -489,6 +496,7 @@ int main()
     }
 
     manager.strategy = (Strategy)(strategy_choice - 1);
+    printf("Strategy set to %s.\n", manager.strategy == FIRST_FIT ? "First Fit" : manager.strategy == BEST_FIT ? "Best Fit" : "Worst Fit");
 
     while (true)
     {
@@ -499,7 +507,7 @@ int main()
         case 1:
         {
             size_t size;
-            printf("Enter allocation size: ");
+            printf("Requested size: ");
             if (scanf("%zu", &size) == 1)
                 allocate_memory(&manager, size);
             break;
