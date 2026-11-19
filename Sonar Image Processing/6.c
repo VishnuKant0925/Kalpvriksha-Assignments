@@ -93,7 +93,7 @@ void filter(int n, int *ptr)
 }
 int main(){
     int n;
-    printf("Enter a number n : ");
+    printf("Enter matrix size (2-10) : ");
     scanf("%d",&n);
     if(n<2 || n>10){
         printf("Invalid value of n :");
